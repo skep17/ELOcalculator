@@ -13,7 +13,8 @@ points difference factor P:
 P = 1 + sum(1/2^n, 1, n) where n is difference between the points scored by the participants.
 
 number of games factor M:
-M = 20 / 1 + sum(1/2^n, 1, n) where n is number of games a participant has played before.
+Initial M = 20.0
+M = M - 1/n where n is number of games a participant has played before.
 
 prediction score Wp:
 Wp = 1 / ( 10^(-k/400) + 1 ) where k is the difference between the participant ratings.
