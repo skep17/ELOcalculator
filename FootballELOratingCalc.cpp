@@ -10,6 +10,7 @@ struct Club {
     int id;
     int rating;
     int num_games;
+    double match_factor = 20.0;
 };
 
 double halfSeries(int n){
@@ -36,8 +37,9 @@ double goalFactor(int goal_difference){
     return result;
 }
 
-double matchFactor(int game_num){
-    return 20.0/(1+halfSeries(game_num));
+double matchFactor(int game_num, double old_mf){
+    if(game_num == 0) return old_mf;
+    return old_mf - (1/game_num);
 }
 
 double predictScore(Club player, Club opponent){
@@ -64,10 +66,10 @@ void playMatch(Club& home, Club& away, int goal_difference){
     int res = realScore(goal_difference);
     double gf = goalFactor(abs(goal_difference));
 
-    double home_mf = matchFactor(home.num_games);
+    double home_mf = matchFactor(home.num_games, home.match_factor);
     double home_ps = predictScore(home, away);
 
-    double away_mf = matchFactor(away.num_games);
+    double away_mf = matchFactor(away.num_games, away.match_factor);
     double away_ps = predictScore(away, home);
 
     int home_diff = round(home_mf*gf*(res-home_ps));
@@ -77,11 +79,13 @@ void playMatch(Club& home, Club& away, int goal_difference){
     away.rating += away_diff;
     home.num_games++;
     away.num_games++;
+    home.match_factor = home_mf;
+    away.match_factor = away_mf;
 }
 
 bool importDB(string path, map<int,Club> &db ){
     ifstream file(path);
-    string header, id, rating, num_games;
+    string header, id, rating, num_games, match_factor;
 
     if(!file){
         cout<< "Couldn't open a file with given path!" << endl;
@@ -94,12 +98,14 @@ bool importDB(string path, map<int,Club> &db ){
         getline(file,id,',');
         if(id == "") break;
         getline(file,rating,',');
-        getline(file,num_games,'\n');
+        getline(file,num_games,',');
+        getline(file,match_factor,'\n');
 
         Club cur;
         cur.id = stoi(id);
         cur.rating = stoi(rating);
         cur.num_games = stoi(num_games);
+        cur.match_factor = stod(match_factor);
 
         db.insert({cur.id, cur});   
     }
@@ -150,7 +156,7 @@ bool exportDB(string path, map<int,Club> &db){
     file << "id," << "rating," << "games\n";
 
     for(const auto& it : db){
-        file << it.second.id << "," << it.second.rating << "," << it.second.num_games << endl;
+        file << it.second.id << "," << it.second.rating << "," << it.second.num_games << "," << it.second.match_factor << endl;
     }
     
     file.close();
