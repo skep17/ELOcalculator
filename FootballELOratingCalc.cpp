@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <map>
+#include <string>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ double halfSeries(int n){
             diff /= 2;
         }
     }
+
+    return result;
 }
 
 double goalFactor(int goal_difference){
@@ -60,7 +63,7 @@ double realScore(int goal_difference){
 void playMatch(Club& home, Club& away, int goal_difference){
     int res = realScore(goal_difference);
     double gf = goalFactor(abs(goal_difference));
-    
+
     double home_mf = matchFactor(home.num_games);
     double home_ps = predictScore(home, away);
 
@@ -72,21 +75,26 @@ void playMatch(Club& home, Club& away, int goal_difference){
 
     home.rating += home_diff;
     away.rating += away_diff;
+    home.num_games++;
+    away.num_games++;
 }
 
 bool importDB(string path, map<int,Club> &db ){
     ifstream file(path);
-    string id, rating, num_games;
+    string header, id, rating, num_games;
 
     if(!file){
         cout<< "Couldn't open a file with given path!" << endl;
         return false;
     }
 
+    getline(file,header);
+
     while (file.good()){
-        getline(file,id,','); 
+        getline(file,id,',');
+        if(id == "") break;
         getline(file,rating,',');
-        getline(file,num_games,',');
+        getline(file,num_games,'\n');
 
         Club cur;
         cur.id = stoi(id);
@@ -103,18 +111,21 @@ bool importDB(string path, map<int,Club> &db ){
 
 bool importMatches(string path, map<int,Club> &db){
     ifstream file(path);
-    string home, hg_num, ag_num, away;
+    string header, home, hg_num, ag_num, away;
 
     if(!file){
         cout<< "Couldn't open a file with given path!" << endl;
         return false;
     }
 
+    getline(file,header);
+
     while (file.good()){
-        getline(file,home,','); 
+        getline(file,home,',');
+        if(home == "") break;
         getline(file,hg_num,',');
         getline(file,ag_num,',');
-        getline(file,away,',');
+        getline(file,away,'\n');
 
         int goal_difference = stoi(hg_num) - stoi(ag_num);
 
@@ -135,6 +146,8 @@ bool exportDB(string path, map<int,Club> &db){
     }
 
     file.clear();
+
+    file << "id," << "rating," << "games\n";
 
     for(const auto& it : db){
         file << it.second.id << "," << it.second.rating << "," << it.second.num_games << endl;
