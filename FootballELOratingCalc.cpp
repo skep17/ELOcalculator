@@ -67,13 +67,13 @@ void playMatch(Club& home, Club& away, int goal_difference){
     double gf = goalFactor(abs(goal_difference));
 
     double home_mf = matchFactor(home.num_games, home.match_factor);
-    double home_ps = predictScore(home, away);
 
     double away_mf = matchFactor(away.num_games, away.match_factor);
-    double away_ps = predictScore(away, home);
 
-    int home_diff = round(home_mf*gf*(res-home_ps));
-    int away_diff = round(away_mf*gf*(1-res-away_ps));
+    double pr_score = predictScore(home, away);
+
+    int home_diff = round(home_mf*gf*(res-pr_score));
+    int away_diff = round(away_mf*gf*(1-res-pr_score));
 
     home.rating += home_diff;
     away.rating += away_diff;
