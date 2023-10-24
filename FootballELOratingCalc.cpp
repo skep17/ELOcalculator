@@ -127,7 +127,7 @@ bool importMatches(string path, map<int,Club> &db){
     getline(file,header);
 
     while (file.good()){
-        getline(file,home,',');
+        getline(file,home, ',');
         if(home == "") break;
         getline(file,hg_num,',');
         getline(file,ag_num,',');
@@ -153,7 +153,7 @@ bool exportDB(string path, map<int,Club> &db){
 
     file.clear();
 
-    file << "id," << "rating," << "games\n";
+    file << "id," << "rating," << "games," << "factor\n";
 
     for(const auto& it : db){
         file << it.second.id << "," << it.second.rating << "," << it.second.num_games << "," << it.second.match_factor << endl;
@@ -174,46 +174,66 @@ bool closeDialog(){
     return true;
 }
 
+string handleDB(map<int,Club> &clubs_db) {
+    string db_path;
+    cout << "Please enter clubs' database file path: ";
+    cin >> db_path;
+    while(!importDB(db_path, clubs_db)){
+        if(closeDialog()){
+            return "";
+        } else {
+            cout << "Please enter correct clubs' database file path: ";
+            cin >> db_path;
+        }
+    }
+    cout << "Clubs' data imported!" << endl;
+    return db_path;
+}
+
+bool handleMatches(map<int,Club> &clubs_db) {
+    int n;
+    string path;
+    cout << "Please, enter the number of files to import: ";
+    cin >> n;
+    for(int i = 0; i < n; i++){
+        cout << "Please enter match results' file path: ";
+        cin >> path;
+        while(!importMatches(path, clubs_db)){
+            if(closeDialog()){
+                return false;
+            } else {
+                cout << "Please enter correct match results' file path: ";
+                cin >> path;
+            }
+        }
+        cout << "Match results of file " << path << " are imported!" << endl;
+    }
+    return true;
+}
+
+void handleExport(map<int,Club> &clubs_db, string db_path){
+    cout << "Exporting results to the clubs' database!" << endl;
+    if(exportDB(db_path,clubs_db)) {
+        cout << "Export finished!" << endl;
+    } else {
+        cout << "Export failed!" << endl;
+    }
+}
+
 int main(){
     map <int, Club> clubs_db;
-    string db_file, res_file;
+    string db_path;
     bool runApp = true;
-    bool import_gate = true;
     bool result_gate = true;
 
     while(runApp){
-        cout << "Please enter clubs' database file path: ";
-        cin >> db_file;
-        while(!importDB(db_file, clubs_db)){
-            if(closeDialog()){
-                runApp = false;
-                import_gate = false;
-                break;
-            } else {
-                cout << "Please enter correct clubs' database file path: ";
-                cin >> db_file;
-            }
-        }
-        if(!import_gate) break;
-        cout << "Clubs' data imported!" << endl;
+        db_path = handleDB(clubs_db);
+        if(db_path == "") break;
 
-        cout << "Please enter match results' file path: ";
-        cin >> res_file;
-        while(!importMatches(res_file, clubs_db)){
-            if(closeDialog()){
-                runApp = false;
-                result_gate = false;
-                break;
-            } else {
-                cout << "Please enter correct match results' file path: ";
-                cin >> res_file;
-            }
-        }
+        result_gate = handleMatches(clubs_db);
         if(!result_gate) break;
-        cout << "Match results imported!" << endl;
-        cout << "Exporting results to the clubs' database!" << endl;
 
-        if(exportDB(db_file,clubs_db)) cout << "Export finished!" << endl;
+        handleExport(clubs_db, db_path);
 
         if(closeDialog()) runApp = false;
     }

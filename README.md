@@ -3,7 +3,7 @@ ELO calculator using csv files for data.
 
 Currently using 2 csv files for data exchange and calculation.
 
-Entity database with 3 columns: ID, Rating, Number of games
+Entity database with 4 columns: ID, Rating, Number of games, Match factor
 
 Match results with 4 columns: ID, Point, Point, ID
 
