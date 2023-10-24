@@ -17,10 +17,10 @@ Initial M = 20.0
 M = M - 1/n where n is number of games a participant has played before.
 
 prediction score Wp:
-Wp = 1 / ( 10^(-k/400) + 1 ) where k is the difference between the participant ratings.
+Wp = 1 / ( 10^(-k/400) + 1 ) where k is the difference between the participants' ratings.
 
 actual score W:
-1 for win, 0.5 for draw, 0 for lose.
+1 for win, 0.5 for draw, 0 for loss.
 
 rating change R:
 R = P*M*(W-Wp)

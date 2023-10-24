@@ -43,9 +43,8 @@ double matchFactor(int game_num, double old_mf){
 }
 
 double predictScore(Club player, Club opponent){
-    int diff = abs(player.rating - opponent.rating);
-
-    return 1.0/(pow(10.0,-diff/400)+1);
+    int diff = opponent.rating-player.rating;
+    return 1.0/(pow(10.0,diff/400)+1);
 }
 
 double realScore(int goal_difference){
@@ -70,10 +69,11 @@ void playMatch(Club& home, Club& away, int goal_difference){
 
     double away_mf = matchFactor(away.num_games, away.match_factor);
 
-    double pr_score = predictScore(home, away);
+    double home_pr_score = predictScore(home, away);
+    double away_pr_score = predictScore(away, home);
 
-    int home_diff = round(home_mf*gf*(res-pr_score));
-    int away_diff = round(away_mf*gf*(1-res-pr_score));
+    int home_diff = round(home_mf*gf*(res-home_pr_score));
+    int away_diff = round(away_mf*gf*(1-res-away_pr_score));
 
     home.rating += home_diff;
     away.rating += away_diff;
@@ -99,7 +99,7 @@ bool importDB(string path, map<int,Club> &db ){
         if(id == "") break;
         getline(file,rating,',');
         getline(file,num_games,',');
-        getline(file,match_factor,'\n');
+        getline(file,match_factor, '\n');
 
         Club cur;
         cur.id = stoi(id);
@@ -169,7 +169,7 @@ bool closeDialog(){
     string ans;
     cin >> ans;
 
-    if(ans == "Y" or ans == "y") return false;
+    if(ans == "Y" || ans == "y") return false;
 
     return true;
 }
